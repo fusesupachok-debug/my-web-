@@ -11,270 +11,347 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
     <style>
-        /* ตั้งค่าพื้นฐาน */
+        /* ตั้งค่าพื้นหลังเว็บให้เป็นสีครีมเอิร์ธโทนแบบไล่ระดับ */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f6f9;
+            background: linear-gradient(135deg, #fdfbf7 0%, #f4f1ea 100%);
             color: #333;
+            min-height: 100vh;
+            display: flex; 
         }
 
-        /* ส่วนหัวของเว็บไซต์ (Header) */
-        .header {
-            background-color: #1b5e20;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 20px;
-            min-height: 60px;
-        }
-        .header-logo {
-            height: 70px;
-            width: 70px; 
-            background-color: white;
-            border-radius: 50%;
-            padding: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            object-fit: contain;
-        }
-        .header-title {
-            text-align: left;
-        }
-        .header-title h1 { margin: 0; font-size: 22px; }
-        .header-title p { margin: 0; font-size: 14px; color: #a5d6a7; }
-
-        /* แถบกรองข้อมูล (Filter Bar) */
-        .filter-bar {
-            background-color: #ffffff;
-            padding: 15px 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .filter-label { font-weight: bold; color: #555; }
-        
-        .filter-select, .search-input {
-            padding: 8px 12px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            background-color: #f8f9fa;
-            font-size: 14px;
-            outline: none;
-            color: #000; 
-        }
-        .filter-select { min-width: 140px; cursor: pointer; }
-        .filter-select:focus, .search-input:focus {
-            border-color: #4caf50;
-            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-        }
-        .btn-filter {
-            padding: 8px 20px;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-filter:hover { background-color: #388e3c; }
-
-        /* ปุ่มล้างตัวกรอง */
-        .btn-clear {
-            padding: 8px 20px;
-            background-color: #757575; 
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-clear:hover { background-color: #616161; }
-
-        /* 🟢 ตกแต่งปุ่ม Export Excel */
-        .btn-export {
-            padding: 8px 20px;
-            background-color: #1d6f42; /* สีเขียว Excel */
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-export:hover { background-color: #144e2e; }
-
-        /* ตกแต่ง Select2 ให้หน้าตาและความสูงพอดีกับกล่องอื่นๆ และสีดำสนิท */
-        .select2-container .select2-selection--single {
-            height: 35px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            background-color: #f8f9fa;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 35px;
-            font-size: 14px;
-            color: #000 !important; 
-        }
-        .select2-container--default .select2-selection--single .select2-selection__placeholder {
-            color: #000 !important; 
-        }
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 33px;
-        }
-
-        /* พื้นที่แสดงข้อมูล */
-        .dashboard-content { padding: 20px 30px; }
-
-        /* กล่องค้นหาชื่อโรงเรียน */
-        .search-box-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .search-input { flex-grow: 1; max-width: 400px; padding: 10px 15px; }
-
-        /* กล่องสรุปข้อมูล (Summary Cards) */
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .summary-card {
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        /* ส่วน Sidebar ฝั่งซ้าย */
+        .sidebar {
+            width: 320px;
+            height: 100vh;
+            position: fixed; 
+            top: 0;
+            left: 0;
+            background-color: rgba(255, 255, 255, 0.95); 
+            box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+            backdrop-filter: blur(5px);
+            overflow-y: auto; 
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            z-index: 1000;
         }
-        .summary-title {
-            font-weight: bold;
-            color: #2e7d32;
-            margin-bottom: 10px;
-            font-size: 14px;
+
+        /* ส่วนหัวของเว็บไซต์ */
+        .header {
+            background: linear-gradient(180deg, #1b5e20 0%, #2e7d32 100%); 
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .summary-value {
-            font-size: 38px;
-            font-weight: bold;
-            color: #1b5e20;
+        .header-logo {
+            height: 80px; width: 80px; background-color: white;
+            border-radius: 50%; padding: 5px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            object-fit: contain; margin-bottom: 15px;
         }
-        .card-area { background-color: #e6ee9c; border-radius: 8px; }
-        .card-school { background-color: #c8e6c9; border-radius: 8px; }
-        .card-target { background-color: #ffccbc; border: 4px solid #1b5e20; border-radius: 40px; }
+        .header-title h1 { margin: 0; font-size: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); line-height: 1.3; }
+        .header-title p { margin: 10px 0 0 0; font-size: 13px; color: #c8e6c9; }
+
+        /* แถบกรองข้อมูล */
+        .filter-bar {
+            padding: 20px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;
+        }
+        .filter-label { font-weight: bold; color: #4e342e; margin-bottom: -5px; font-size: 14px;}
+        .filter-select, .search-input {
+            width: 100%; 
+            box-sizing: border-box;
+            padding: 10px 12px; border: 1px solid #ced4da; border-radius: 8px;
+            background-color: #f8f9fa; font-size: 14px; outline: none; color: #000; 
+        }
+        .filter-select:focus, .search-input:focus {
+            border-color: #4caf50; box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        /* ปุ่มต่างๆ */
+        .sidebar-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-clear, .btn-export {
+            padding: 12px 20px; color: white; border: none; border-radius: 8px;
+            cursor: pointer; font-weight: bold; transition: all 0.2s;
+            width: 100%; text-align: center;
+        }
+        .btn-clear { background-color: #795548; } 
+        .btn-clear:hover { background-color: #5d4037; transform: translateY(-2px); }
+        .btn-export { background-color: #2e7d32; }
+        .btn-export:hover { background-color: #1b5e20; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(46,125,50,0.3); }
+
+        /* ตกแต่ง Select2 */
+        .select2-container { width: 100% !important; }
+        .select2-container .select2-selection--single {
+            height: 38px; border: 1px solid #ced4da; border-radius: 8px; background-color: #f8f9fa;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered,
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            line-height: 38px; font-size: 14px; color: #000 !important; 
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
+
+        /* เนื้อหาหลักฝั่งขวา */
+        .main-content {
+            margin-left: 320px; 
+            width: calc(100% - 320px); 
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .dashboard-content { padding: 30px; }
+
+        /* กล่องสรุปข้อมูล */
+        .summary-cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; margin-bottom: 25px;
+        }
+        .summary-card {
+            padding: 25px 20px; border-radius: 16px; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .summary-title { font-weight: bold; color: #333; margin-bottom: 10px; font-size: 15px; }
+        .summary-value { font-size: 38px; font-weight: bold; color: #1b5e20; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
+        
+        .card-area { background: linear-gradient(135deg, #e9edc9, #d4e09b); }
+        .card-school { background: linear-gradient(135deg, #c8e6c9, #a5d6a7); }
+        .card-target-old { background: linear-gradient(135deg, #ffecb3, #ffe082); } 
+        .card-target-new { background: linear-gradient(135deg, #ffccbc, #ffab91); }
+
+        /* การจัดวางกราฟ */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        /* 🟢 กล่องกราฟ - อัปเดตสีพื้นหลังให้เต็มกล่อง */
+        .chart-box {
+            background-color: #f4f8f4; /* 🟢 สีเขียวอ่อนสุดๆ กระจายเต็มกล่อง */
+            padding: 20px; border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; overflow: hidden;
+            border: 1px solid #fff;
+        }
+        .chart-box.full-width { grid-column: 1 / -1; }
+        
+        /* ลายน้ำยังคงอยู่หลังสุด */
+        .chart-box::before {
+            content: "";
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/floral-motif.png');
+            opacity: 0.15; 
+            pointer-events: none; 
+            z-index: 0;
+        }
+
+        .chart-box h3, .canvas-wrapper, .bar-wrapper, .line-wrapper, #thailand_map_div, p {
+            position: relative; z-index: 1;
+        }
+
+        .chart-box h3 { 
+            margin-top: 0; color: #2e7d32; border-bottom: 2px dashed #c8e6c9; 
+            padding-bottom: 10px; text-align: center; width: 100%; font-size: 17px;
+        }
+        
+        /* 🟢 เอาสีพื้นหลังส่วนเกินใน wrapper ย่อยๆ ออก ให้โปร่งใสไปเห็นสีเต็มกล่อง */
+        .canvas-wrapper { 
+            position: relative; width: 100%; max-width: 300px; height: 260px; margin: 0 auto;
+        }
+        .bar-wrapper, .line-wrapper { 
+            position: relative; width: 100%; height: 260px;
+        }
+        #thailand_map_div {
+            width: 100%; height: 450px; display: flex; justify-content: center;
+        }
 
         /* ตารางข้อมูล */
         .table-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            overflow-x: auto;
+            background-color: rgba(255, 255, 255, 0.9); padding: 25px; border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto;
+            border: 1px solid #fff;
         }
-        .table-container h3 { margin-top: 0; color: #2e7d32; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .table-container h3 { margin-top: 0; color: #2e7d32; border-bottom: 2px dashed #c8e6c9; padding-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { background-color: #f1f8e9; color: #33691e; white-space: nowrap; }
-        tr:hover { background-color: #f9f9f9; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background-color: #f1f8e9; color: #2e7d32; white-space: nowrap; font-weight: bold; }
+        tr:hover { background-color: #fdfbf7; }
+
+        .google-visualization-tooltip {
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            border: 1px solid #ccc !important;
+            padding: 0 !important;
+        }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <img src="https://i.postimg.cc/CLqYPRBp/sanea-khxng-loko-kes'tr-x-nthr-y-ni-rong-re-yn-(2).png" alt="โลโก้เกษตรอินทรีย์" class="header-logo">
-        
-        <div class="header-title">
-            <h1>ระบบฐานข้อมูลโครงการเกษตรอินทรีย์ในโรงเรียน</h1>
-            <p>กรมพัฒนาที่ดิน — Land Development Department</p>
-        </div>
-    </header>
-
-    <div class="filter-bar">
-        <span class="filter-label">🔍 กรองข้อมูล:</span>
-
-        <select id="statusFilter" class="filter-select" onchange="filterLocalData()">
-            <option value="">-- สถานะโรงเรียนทั้งหมด --</option>
-            <option value="โรงเรียนใหม่">โรงเรียนใหม่</option>
-            <option value="โรงเรียนต่อยอด">โรงเรียนต่อยอด</option>
-        </select>
-
-        <select id="spkFilter" class="filter-select" onchange="filterLocalData()">
-            <option value="">-- ทุกหน่วยงาน (สพข.) --</option>
-        </select>
-
-        <select id="spdFilter" class="filter-select">
-            <option value="">-- ทุก สพด. --</option>
-        </select>
-
-        <select id="yearFilter" class="filter-select" onchange="filterLocalData()">
-            <option value="">-- ทุกปีงบประมาณที่เข้าร่วม --</option>
-        </select>
-
-        <button class="btn-filter" onclick="fetchData()">ดึงข้อมูล</button>
-        <button class="btn-clear" onclick="clearFilters()">ล้างตัวกรอง</button>
-        
-        <button class="btn-export" onclick="exportToExcel()">📥 โหลด Excel</button>
-    </div>
-
-    <div class="dashboard-content">
-        
-        <div class="search-box-container">
-            <span class="filter-label">🏫 ชื่อโรงเรียน:</span>
-            <input type="text" id="schoolSearch" class="search-input" placeholder="พิมพ์ชื่อโรงเรียนที่ต้องการค้นหา..." onkeyup="filterLocalData()">
-            <span style="font-size: 12px; color: #888;">(พิมพ์แล้วระบบจะค้นหาจากข้อมูลที่ดึงมาให้ทันที)</span>
-        </div>
-
-        <div class="summary-cards">
-            <div class="summary-card card-area">
-                <div class="summary-title">พื้นที่การเกษตร (ไร่)</div>
-                <div class="summary-value" id="totalArea">0.00</div>
+    <aside class="sidebar">
+        <header class="header">
+            <img src="https://i.postimg.cc/CLqYPRBp/sanea-khxng-loko-kes'tr-x-nthr-y-ni-rong-re-yn-(2).png" alt="โลโก้เกษตรอินทรีย์" class="header-logo">
+            <div class="header-title">
+                <h1>ระบบฐานข้อมูลโครงการเกษตรอินทรีย์ในโรงเรียน</h1>
+                <p>กรมพัฒนาที่ดิน — Land Development Department</p>
             </div>
-            <div class="summary-card card-school">
-                <div class="summary-title">จำนวนโรงเรียน (แห่ง)</div>
-                <div class="summary-value" id="totalSchool">0</div>
-            </div>
-            <div class="summary-card card-target">
-                <div class="summary-title">เป้าหมายโรงเรียนต่อยอด</div>
-                <div class="summary-value">500</div>
-            </div>
-            <div class="summary-card card-target">
-                <div class="summary-title">เป้าหมายโรงเรียนใหม่</div>
-                <div class="summary-value">100</div>
+        </header>
+
+        <div class="filter-bar">
+            <span class="filter-label">🔍 ค้นหาชื่อโรงเรียน:</span>
+            <input type="text" id="schoolSearch" class="search-input" placeholder="พิมพ์ชื่อโรงเรียน..." onkeyup="filterLocalData()">
+
+            <div style="border-bottom: 1px dashed #ccc; margin: 5px 0;"></div> 
+
+            <span class="filter-label">📌 ตัวกรองอัจฉริยะ:</span>
+            <select id="statusFilter" class="filter-select" onchange="filterLocalData()">
+                <option value="">-- สถานะทั้งหมด --</option>
+                <option value="โรงเรียนใหม่">โรงเรียนใหม่</option>
+                <option value="โรงเรียนต่อยอด">โรงเรียนต่อยอด</option>
+            </select>
+            
+            <select id="spkFilter" class="filter-select" onchange="updateSpdDropdown()">
+                <option value="">-- ทุกหน่วยงาน (สพข.) --</option>
+            </select>
+
+            <select id="spdFilter" class="filter-select">
+                <option value="">-- ทุก สพด. --</option>
+            </select>
+
+            <select id="yearFilter" class="filter-select" onchange="filterLocalData()">
+                <option value="">-- ทุกปีงบประมาณ --</option>
+            </select>
+
+            <div class="sidebar-buttons">
+                <button class="btn-clear" onclick="clearFilters()">🔄 ล้างตัวกรอง</button>
+                <button class="btn-export" onclick="exportToExcel()">📥 ดาวน์โหลด Excel</button>
             </div>
         </div>
+    </aside>
 
-        <div class="table-container">
-            <h3>ข้อมูลของโรงเรียน</h3>
-            <table id="dataTable">
-                <thead id="tableHead">
-                    <tr>
-                        <th>ตารางข้อมูล</th>
-                    </tr>
-                </thead>
-                <tbody id="dataTableBody">
-                    <tr>
-                        <td style="text-align: center; color: #666; padding: 30px;">กรุณากดปุ่ม "ดึงข้อมูล" ด้านบน เพื่อโหลดข้อมูลจาก Google Sheets</td>
-                    </tr>
-                </tbody>
-            </table>
+    <main class="main-content">
+        <div class="dashboard-content">
+
+            <div class="summary-cards">
+                <div class="summary-card card-area">
+                    <div class="summary-title">🌾 พื้นที่การเกษตร (ไร่)</div>
+                    <div class="summary-value" id="totalArea">0.00</div>
+                </div>
+                <div class="summary-card card-school">
+                    <div class="summary-title">🏫 จำนวนโรงเรียน (แห่ง)</div>
+                    <div class="summary-value" id="totalSchool">0</div>
+                </div>
+                <div class="summary-card card-target-old">
+                    <div class="summary-title">🎯 เป้าหมายโรงเรียนต่อยอด</div>
+                    <div class="summary-value">500</div>
+                </div>
+                <div class="summary-card card-target-new">
+                    <div class="summary-title">🌱 เป้าหมายโรงเรียนใหม่</div>
+                    <div class="summary-value">100</div>
+                </div>
+            </div>
+
+            <div class="chart-box full-width" style="margin-bottom: 20px;">
+                <h3>🗺️ แผนที่แสดงความหนาแน่นของพื้นที่ทำการเกษตร (ไร่) แยกตามจังหวัด</h3>
+                <p style="font-size: 12px; color: #888; margin-top: -5px; margin-bottom: 10px;">(สีเข้ม = พื้นที่เกษตรมาก, สีอ่อน = พื้นที่เกษตรน้อย, วางเมาส์เพื่อดูรายละเอียด)</p>
+                <div id="thailand_map_div"></div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <h3>📊 สัดส่วนสถานะโรงเรียน</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>📈 จำนวนโรงเรียนแยกตาม สพข.</h3>
+                    <div class="bar-wrapper">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>📉 แนวโน้มตามปีงบประมาณ</h3>
+                    <div class="line-wrapper">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3>📑 ข้อมูลรายละเอียดของโรงเรียน</h3>
+                <table id="dataTable">
+                    <thead id="tableHead">
+                        <tr><th>ตารางข้อมูล</th></tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <tr><td style="text-align: center; color: #666; padding: 30px;">กำลังประมวลผลข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
-
-    </div>
+    </main>
 
     <script>
-        // สร้างตัวเลือก ปีที่เข้าร่วมโครงการ
+        const thaiProvToISO = {
+            "กรุงเทพมหานคร": "TH-10", "กรุงเทพฯ": "TH-10", "กทม": "TH-10", "สมุทรปราการ": "TH-11", "นนทบุรี": "TH-12", "ปทุมธานี": "TH-13", "พระนครศรีอยุธยา": "TH-14", "อยุธยา": "TH-14", "อ่างทอง": "TH-15", "ลพบุรี": "TH-16", "สิงห์บุรี": "TH-17", "ชัยนาท": "TH-18", "สระบุรี": "TH-19",
+            "ชลบุรี": "TH-20", "ระยอง": "TH-21", "จันทบุรี": "TH-22", "ตราด": "TH-23", "ฉะเชิงเทรา": "TH-24", "ปราจีนบุรี": "TH-25", "นครนายก": "TH-26", "สระแก้ว": "TH-27",
+            "นครราชสีมา": "TH-30", "โคราช": "TH-30", "บุรีรัมย์": "TH-31", "สุรินทร์": "TH-32", "ศรีสะเกษ": "TH-33", "อุบลราชธานี": "TH-34", "ยโสธร": "TH-35", "ชัยภูมิ": "TH-36", "อำนาจเจริญ": "TH-37", "บึงกาฬ": "TH-38", "หนองบัวลำภู": "TH-39",
+            "ขอนแก่น": "TH-40", "อุดรธานี": "TH-41", "เลย": "TH-42", "หนองคาย": "TH-43", "มหาสารคาม": "TH-44", "ร้อยเอ็ด": "TH-45", "กาฬสินธุ์": "TH-46", "สกลนคร": "TH-47", "นครพนม": "TH-48", "มุกดาหาร": "TH-49",
+            "เชียงใหม่": "TH-50", "ลำพูน": "TH-51", "ลำปาง": "TH-52", "อุตรดิตถ์": "TH-53", "แพร่": "TH-54", "น่าน": "TH-55", "พะเยา": "TH-56", "เชียงราย": "TH-57", "แม่ฮ่องสอน": "TH-58",
+            "นครสวรรค์": "TH-60", "อุทัยธานี": "TH-61", "กำแพงเพชร": "TH-62", "ตาก": "TH-63", "สุโขทัย": "TH-64", "พิษณุโลก": "TH-65", "พิจิตร": "TH-66", "เพชรบูรณ์": "TH-67",
+            "ราชบุรี": "TH-70", "กาญจนบุรี": "TH-71", "สุพรรณบุรี": "TH-72", "นครปฐม": "TH-73", "สมุทรสาคร": "TH-74", "สมุทรสงคราม": "TH-75", "เพชรบุรี": "TH-76", "ประจวบคีรีขันธ์": "TH-77",
+            "นครศรีธรรมราช": "TH-80", "กระบี่": "TH-81", "พังงา": "TH-82", "ภูเก็ต": "TH-83", "สุราษฎร์ธานี": "TH-84", "ระนอง": "TH-85", "ชุมพร": "TH-86",
+            "สงขลา": "TH-90", "สตูล": "TH-91", "ตรัง": "TH-92", "พัทลุง": "TH-93", "ปัตตานี": "TH-94", "ยะลา": "TH-95", "นราธิวาส": "TH-96"
+        };
+
+        const spkMapping = {
+            "1": ["ชัยนาท", "นครนายก", "นนทบุรี", "ปทุมธานี", "ลพบุรี", "สุพรรณบุรี", "พระนครศรีอยุธยา", "อ่างทอง", "สิงห์บุรี", "สระบุรี", "นครปฐม", "สมุทรปราการ", "กรุงเทพมหานคร"],
+            "2": ["จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี", "ตราด", "ระยอง", "สระแก้ว", "ปราจีนบุรี"],
+            "3": ["ชัยภูมิ", "นครราชสีมา", "บุรีรัมย์", "สุรินทร์"],
+            "4": ["นครพนม", "อำนาจเจริญ", "อุบลราชธานี", "ร้อยเอ็ด", "ศรีสะเกษ", "มุกดาหาร", "ยโสธร"],
+            "5": ["ขอนแก่น", "อุดรธานี", "มหาสารคาม", "หนองคาย", "หนองบัวลำภู", "กาฬสินธุ์", "สกลนคร", "บึงกาฬ"],
+            "6": ["เชียงใหม่", "แม่ฮ่องสอน", "ลำพูน", "ลำปาง"],
+            "7": ["น่าน", "เชียงราย", "แพร่", "พะเยา"],
+            "8": ["พิษณุโลก", "อุตรดิตถ์", "เพชรบูรณ์", "เลย", "พิจิตร"],
+            "9": ["นครสวรรค์", "ตาก", "กำแพงเพชร", "อุทัยธานี", "สุโขทัย"],
+            "10": ["ราชบุรี", "กาญจนบุรี", "เพชรบุรี", "สมุทรสาคร", "สมุทรสงคราม", "ประจวบคีรีขันธ์"],
+            "11": ["สุราษฎร์ธานี", "ระนอง", "พังงา", "นครศรีธรรมราช", "ชุมพร", "กระบี่", "ภูเก็ต"],
+            "12": ["สงขลา", "สตูล", "ปัตตานี", "ยะลา", "พัทลุง", "นราธิวาส", "ตรัง"]
+        };
+        const allProvinces = Object.keys(thaiProvToISO).filter(p => !["กรุงเทพฯ", "กทม", "อยุธยา", "โคราช"].includes(p));
+
+        let isGoogleChartsLoaded = false;
+        google.charts.load('current', { 'packages': ['geochart'] });
+        google.charts.setOnLoadCallback(function() {
+            isGoogleChartsLoaded = true;
+            if (globalData.length > 0) filterLocalData();
+        });
+
         const yearSelect = document.getElementById('yearFilter');
         const currentYearTh = new Date().getFullYear() + 543;
         for (let y = currentYearTh - 19; y <= currentYearTh + 2; y++) {
@@ -283,87 +360,103 @@
             yearSelect.appendChild(option);
         }
 
-        // สร้างตัวเลือก สพข. 1-12
         const spkSelect = document.getElementById('spkFilter');
         for (let i = 1; i <= 12; i++) {
             let option = document.createElement('option');
-            option.value = String(i); 
-            option.text = `สพข.${i}`;
+            option.value = String(i); option.text = `สพข.${i}`;
             spkSelect.appendChild(option);
         }
 
-        // นำข้อมูลจังหวัดใส่เข้า Dropdown (Select)
-        const provinces = ["กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา","ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม","นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี","นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์","ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี","ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง","พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน","ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ","สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี","สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ","อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"];
-        const spdSelect = document.getElementById('spdFilter');
-        provinces.forEach(province => {
-            let option = document.createElement('option');
-            option.value = province; option.text = province;
-            spdSelect.appendChild(option);
-        });
-
-        // เปิดใช้งาน Select2 
         $(document).ready(function() {
-            $('#spdFilter').select2({
-                width: '180px' 
-            });
-            $('#spdFilter').on('change', function() {
-                filterLocalData();
-            });
+            $('#spdFilter').select2({ width: '100%' }); 
+            $('#spdFilter').on('change', function() { filterLocalData(); });
+            
+            populateSpdDropdown(allProvinces);
+            fetchData();
         });
 
-        // ลิงก์ API
-        const API_URL = "https://script.google.com/macros/s/AKfycbyio_q0ZKRs2_8-PtwT6wt9vsYRFtuT7dMwpkxMpy3WBlX7Dyv62a33QZpmfHMxVYqlAA/exec";
-        
-        let globalData = []; 
+        function updateSpdDropdown() {
+            const selectedSpk = document.getElementById('spkFilter').value;
+            let provincesToShow = [];
 
-        // ฟังก์ชันดึงข้อมูลหลัก
+            if (selectedSpk && spkMapping[selectedSpk]) {
+                provincesToShow = spkMapping[selectedSpk]; 
+            } else {
+                provincesToShow = allProvinces; 
+            }
+
+            populateSpdDropdown(provincesToShow);
+            filterLocalData();
+        }
+
+        function populateSpdDropdown(provinceList) {
+            const spdSelect = document.getElementById('spdFilter');
+            const oldSpdValue = spdSelect.value; 
+
+            spdSelect.innerHTML = '<option value="">-- ทุก สพด. --</option>';
+
+            provinceList.forEach(province => {
+                let option = document.createElement('option');
+                option.value = province; 
+                option.text = province;
+                spdSelect.appendChild(option);
+            });
+
+            if (oldSpdValue && provinceList.includes(oldSpdValue)) {
+                spdSelect.value = oldSpdValue;
+            } else {
+                spdSelect.value = "";
+            }
+
+            $('#spdFilter').trigger('change.select2');
+        }
+
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (isGoogleChartsLoaded && globalData.length > 0) filterLocalData();
+            }, 300);
+        });
+
+        const API_URL = "https://script.google.com/macros/s/AKfycbyio_q0ZKRs2_8-PtwT6wt9vsYRFtuT7dMwpkxMpy3WBlX7Dyv62a33QZpmfHMxVYqlAA/exec";
+        let globalData = []; 
+        let pieChartInstance = null; 
+        let barChartInstance = null;
+        let lineChartInstance = null; 
+
         async function fetchData() {
             const tbody = document.getElementById('dataTableBody');
-            
-            tbody.innerHTML = '<tr><td style="text-align: center;">กำลังโหลดข้อมูลจากระบบ...</td></tr>';
-            
+            tbody.innerHTML = '<tr><td style="text-align: center; padding: 40px;"><h3 style="color: #1b5e20;">⏳ กำลังโหลดข้อมูลจากระบบ...</h3><p style="color: #666;">อาจใช้เวลาสักครู่ ขึ้นอยู่กับปริมาณข้อมูล</p></td></tr>';
             try {
                 const response = await fetch(API_URL);
                 globalData = await response.json(); 
-                
                 filterLocalData(); 
             } catch (error) {
                 console.error("Error:", error);
-                tbody.innerHTML = '<tr><td style="text-align: center; color: red;">เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบ API</td></tr>';
+                tbody.innerHTML = '<tr><td style="text-align: center; color: red; padding: 30px;">เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบการตั้งค่าสิทธิ์ API ของคุณ</td></tr>';
             }
         }
 
-        // ฟังก์ชันล้างตัวกรอง
         function clearFilters() {
             document.getElementById('statusFilter').value = "";
             document.getElementById('spkFilter').value = "";
             document.getElementById('yearFilter').value = "";
             document.getElementById('schoolSearch').value = "";
             
-            $('#spdFilter').val("").trigger("change.select2");
-            
-            filterLocalData();
+            updateSpdDropdown(); 
         }
 
-        // 🟢 ฟังก์ชันดาวน์โหลด Excel
         function exportToExcel() {
-            // เช็คก่อนว่ามีข้อมูลถูกดึงมาหรือยัง
             if (globalData.length === 0) {
-                alert("กรุณากด 'ดึงข้อมูล' ก่อนทำการดาวน์โหลดครับ");
+                alert("ระบบกำลังโหลดข้อมูล กรุณารอสักครู่ครับ");
                 return;
             }
-
-            // ชี้เป้าไปที่ตารางที่เราต้องการดึงข้อมูล
             let tableElement = document.getElementById("dataTable");
-            
-            // แปลง HTML Table เป็นข้อมูลแบบ Workbook (ไฟล์ Excel)
             let wb = XLSX.utils.table_to_book(tableElement, { sheet: "ข้อมูลโรงเรียน" });
-            
-            // สั่งให้ดาวน์โหลดออกมาเป็นไฟล์ .xlsx
             XLSX.writeFile(wb, "ฐานข้อมูลโครงการเกษตรอินทรีย์.xlsx");
         }
 
-        // ฟังก์ชันสำหรับกรองข้อมูล
         function filterLocalData() {
             if(globalData.length === 0) return;
 
@@ -373,19 +466,16 @@
             const filterSpd = document.getElementById('spdFilter').value;
             const searchText = document.getElementById('schoolSearch').value.trim().toLowerCase();
 
-            // คัดแยกข้อมูลตามเงื่อนไข
             const filteredData = globalData.filter(row => {
                 let matchYear = filterYear === "" || String(row["ปีงบประมาณ ที่โรงเรียนเข้าร่วมโครงการ"]) === filterYear;
                 let matchStatus = filterStatus === "" || row["สถานะโรงเรียน"] === filterStatus;
                 let matchSpk = filterSpk === "" || String(row["หน่วยงานที่รับผิดชอบ (สพข.)"]) === filterSpk;
                 let matchSpd = filterSpd === "" || row["สพด. ที่รับผิดชอบ"] === filterSpd;
-                
                 let matchName = true;
                 if (searchText !== "") {
                     let schoolName = row["ชื่อโรงเรียน"] ? String(row["ชื่อโรงเรียน"]).toLowerCase() : "";
                     matchName = schoolName.includes(searchText);
                 }
-
                 return matchYear && matchStatus && matchSpk && matchSpd && matchName;
             });
 
@@ -394,28 +484,213 @@
 
             filteredData.forEach(row => {
                 let area = parseFloat(row["พื้นที่ทำการเกษตร (ไร่)"]);
-                if (!isNaN(area)) {
-                    totalAreaSum += area;
-                }
+                if (!isNaN(area)) { totalAreaSum += area; }
             });
 
             document.getElementById('totalSchool').innerText = totalSchoolCount.toLocaleString();
             document.getElementById('totalArea').innerText = totalAreaSum.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             renderTable(filteredData);
+            drawCharts(filteredData); 
         }
 
-        // ฟังก์ชันวาดตารางแบบไดนามิก
+        function drawCharts(dataArray) {
+            let newSchoolCount = 0;
+            let oldSchoolCount = 0;
+            const spkCounts = Array(12).fill(0);
+            const yearStats = {};
+            
+            const provinceDataMap = {}; 
+
+            dataArray.forEach(row => {
+                const status = row["สถานะโรงเรียน"] || "";
+                let isNew = 0;
+                let isOld = 0;
+                if (status.includes("ใหม่")) { newSchoolCount++; isNew = 1; }
+                else if (status.includes("ต่อยอด")) { oldSchoolCount++; isOld = 1; }
+
+                let spk = row["หน่วยงานที่รับผิดชอบ (สพข.)"];
+                if (spk) {
+                    let spkNum = parseInt(String(spk).replace(/[^0-9]/g, ''));
+                    if (spkNum >= 1 && spkNum <= 12) spkCounts[spkNum - 1]++;
+                }
+
+                let year = String(row["ปีงบประมาณ ที่โรงเรียนเข้าร่วมโครงการ"] || "").trim();
+                if (year !== "") {
+                    if (!yearStats[year]) yearStats[year] = 0;
+                    yearStats[year]++;
+                }
+
+                let prov = row["สพด. ที่รับผิดชอบ"] || "ไม่ระบุ";
+                prov = prov.replace("สพด.", "").replace("จังหวัด", "").trim(); 
+                
+                let area = parseFloat(row["พื้นที่ทำการเกษตร (ไร่)"]);
+                if (isNaN(area)) area = 0;
+                
+                if (!provinceDataMap[prov]) {
+                    provinceDataMap[prov] = { area: 0, newCount: 0, oldCount: 0 };
+                }
+                provinceDataMap[prov].area += area;
+                provinceDataMap[prov].newCount += isNew;
+                provinceDataMap[prov].oldCount += isOld;
+            });
+
+            if (isGoogleChartsLoaded) {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Province');
+                data.addColumn('number', 'พื้นที่ทำการเกษตร (ไร่)'); 
+                data.addColumn({type: 'string', role: 'tooltip', p: {html: true}}); 
+
+                const rows = [];
+                for (const [prov, stats] of Object.entries(provinceDataMap)) {
+                    const iso = thaiProvToISO[prov];
+                    if (iso && (stats.area > 0 || stats.newCount > 0 || stats.oldCount > 0)) { 
+                        
+                        let tooltipHtml = `
+                            <div style="padding: 12px; min-width: 160px; font-family: 'Segoe UI', Tahoma, sans-serif;">
+                                <h4 style="margin: 0 0 10px 0; color: #1b5e20; border-bottom: 2px solid #e8f5e9; padding-bottom: 5px; font-size: 16px;">
+                                    📍 จังหวัด${prov}
+                                </h4>
+                                <div style="margin-bottom: 6px; font-size: 13px; color: #555;">
+                                    🌱 โรงเรียนใหม่: <b style="color: #ff9800; font-size: 15px;">${stats.newCount}</b> แห่ง
+                                </div>
+                                <div style="margin-bottom: 6px; font-size: 13px; color: #555;">
+                                    🎯 โรงเรียนต่อยอด: <b style="color: #4caf50; font-size: 15px;">${stats.oldCount}</b> แห่ง
+                                </div>
+                                <div style="font-size: 13px; color: #555;">
+                                    🌾 พื้นที่เกษตร: <b style="color: #1b5e20; font-size: 15px;">${stats.area.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b> ไร่
+                                </div>
+                            </div>
+                        `;
+
+                        rows.push([{v: iso, f: prov}, stats.area, tooltipHtml]);
+                    }
+                }
+
+                if (rows.length === 0) {
+                    rows.push([{v: 'TH-10', f: 'กรุงเทพมหานคร'}, 0, '<div style="padding: 10px;">ไม่มีข้อมูล</div>']);
+                }
+
+                data.addRows(rows);
+
+                var options = {
+                    region: 'TH', 
+                    resolution: 'provinces',
+                    colorAxis: {colors: ['#e8f5e9', '#81c784', '#388e3c', '#1b5e20']}, 
+                    backgroundColor: 'transparent', 
+                    datalessRegionColor: 'rgba(240, 240, 240, 0.5)', 
+                    defaultColor: '#f5f5f5',
+                    keepAspectRatio: true,
+                    tooltip: { isHtml: true } 
+                };
+
+                var chart = new google.visualization.GeoChart(document.getElementById('thailand_map_div'));
+                chart.draw(data, options);
+            }
+
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            if (pieChartInstance) pieChartInstance.destroy();
+            
+            if (newSchoolCount > 0 || oldSchoolCount > 0) {
+                pieChartInstance = new Chart(ctxPie, {
+                    type: 'pie',
+                    data: {
+                        labels: ['โรงเรียนใหม่', 'โรงเรียนต่อยอด'],
+                        datasets: [{
+                            data: [newSchoolCount, oldSchoolCount],
+                            backgroundColor: ['#ff9800', '#4caf50'], hoverOffset: 6,
+                            borderWidth: 2, borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) label += ': ';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100) + '%';
+                                        return label + value + ' แห่ง (' + percentage + ')';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const spkLabels = ["สพข.1", "สพข.2", "สพข.3", "สพข.4", "สพข.5", "สพข.6", "สพข.7", "สพข.8", "สพข.9", "สพข.10", "สพข.11", "สพข.12"];
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            if (barChartInstance) barChartInstance.destroy();
+
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: spkLabels,
+                    datasets: [{
+                        label: 'จำนวนโรงเรียน (แห่ง)',
+                        data: spkCounts,
+                        backgroundColor: '#2e7d32', borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            const sortedYears = Object.keys(yearStats).sort((a, b) => parseInt(a) - parseInt(b));
+            const yearDataCounts = sortedYears.map(year => yearStats[year]);
+
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            if (lineChartInstance) lineChartInstance.destroy();
+
+            lineChartInstance = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: sortedYears,
+                    datasets: [{
+                        label: 'จำนวนโรงเรียน',
+                        data: yearDataCounts,
+                        borderColor: '#f57c00', backgroundColor: 'rgba(255, 152, 0, 0.1)', 
+                        borderWidth: 3, pointBackgroundColor: '#f57c00', pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#f57c00',
+                        pointRadius: 5, pointHoverRadius: 7, fill: true, tension: 0.4 
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { autoSkip: true, maxRotation: 45, minRotation: 45 } },
+                        y: { beginAtZero: true }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
         function renderTable(dataArray) {
             const thead = document.getElementById('tableHead');
             const tbody = document.getElementById('dataTableBody');
 
             if (dataArray.length > 0) {
-                const headers = Object.keys(dataArray[0]);
-                let headHtml = '<tr>';
-                headers.forEach(header => {
-                    headHtml += `<th>${header}</th>`;
+                const headers = Object.keys(dataArray[0]).filter(header => {
+                    const text = header.trim();
+                    if (text === "เลขที่" || text === "หมู่") return false;
+                    if (text.includes("โทรศัพท์") || text.includes("โทรศัพ") || text.includes("เบอโทร")) return false;
+                    if (text.toUpperCase().includes("PDPA")) return false;
+                    if (text.includes("ประทับเวลา")) return false; 
+                    
+                    return true;
                 });
+
+                let headHtml = '<tr>';
+                headers.forEach(header => { headHtml += `<th>${header}</th>`; });
                 headHtml += '</tr>';
                 thead.innerHTML = headHtml;
 
@@ -431,7 +706,7 @@
                 tbody.innerHTML = bodyHtml;
             } else {
                 thead.innerHTML = '<tr><th>ผลการค้นหา</th></tr>';
-                tbody.innerHTML = '<tr><td style="text-align: center;">ไม่พบข้อมูลโรงเรียนที่ตรงกับเงื่อนไขการค้นหา</td></tr>';
+                tbody.innerHTML = '<tr><td style="text-align: center; padding: 30px;">ไม่พบข้อมูลโรงเรียนที่ตรงกับเงื่อนไขการค้นหา</td></tr>';
             }
         }
     </script>
